@@ -4,7 +4,7 @@
 body{
     background-color: #151515;
 }
-.GameName{
+.GameColor, .card-title, .card-text{
     color: aliceblue;
 
 }
