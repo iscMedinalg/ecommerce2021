@@ -1,4 +1,4 @@
-const url = 'https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&dates=2019-09-01,2019-09-30&platforms=18,1,7'
+const url = 'https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&dates=2019-09-01,2019-09-30&platforms=18,1,7&{id}/movies'
 
 const $imagenes = document.querySelector('#ImgGame')
 const $GameName = document.querySelector('#GameName')
