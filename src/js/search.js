@@ -15,39 +15,30 @@ d.addEventListener("keypress", async e=>{
                     json = await res.json();
 
                     console.log(api, res, json)
+                    const precios = [1199, 1199, 999, 899, 1199,  999, 1199, 899, 999, 1199, 899, 1199, 999, 1199, 1399, 499, 799, 299, 999, 599]
 
                     if(!res.ok) throw { status: res.status, statusText: res.statusText }
 
                     if(json.results.length === 0){
                         $shows.innerHTML = `<h2>No existen resultados para </h2>${query}`;
                     } else {
-                        json.results.forEach(el => {
-                                
-                            $template.querySelector("#GameName").textContent = el.name;
-                            el.genres.forEach(element =>{
-                                $template.querySelector("#Genres").textContent = element.name;
-                            });
+                        json.results.forEach(element => {
 
-                              /*  el.parent_platforms.forEach(element =>{
-                                    $template.querySelector("#Parent_platforms").textContent = element.name;
-                                });*/
-
-                                //$template.querySelector("#Rating").textContent = el.rating;
+                            //precio del juego
+                            $template.querySelector("#precio").textContent = precios.shift();    
+                            $template.querySelector("#GameName").textContent = element.name;
+                            //Rating del Juego
+                            $template.querySelector("#Rating").innerHTML = "Rating: " + element.rating + ` <i class="fas fa-star" style="color: yellow;"></i>` 
+                            ? "Rating: " + element.rating + ` <i class="fas fa-star" style="color: yellow;"></i>` : "Sin Puntuación";
+                            //Clasificación del Juego
+                            $template.querySelector("#esrb_rating").textContent =  element.esrb_rating == {} ? "Clasificación: "  :  element.esrb_rating == null ? "Sin Clasificación" : "Clasificación: " + element.esrb_rating.name;
+                            //Imagen del Juego
+                            $template.querySelector("img").src = element.background_image ? element.background_image : element.short_screenshots[0].image;
+                            $template.querySelector("img").alt = element.name;
+                            $template.querySelector(".Carrito").id = element.id;
+                            //Genero del Juego
+                            $template.querySelector("#Genres").innerHTML = element.genres[0].name;
                                 
-                                /*el.stores.forEach(element =>{
-                                    $template.querySelector("#Stores").textContent = element.stores;
-                                });*/
-
-                                //$template.querySelector("#esrb_rating").textContent = el.esrb_rating.name ? el.esrb_rating.name : "Sin clasificación";
-                                
-                            $template.querySelector("#Rating").textContent = "Rating: " + el.rating ? "Rating: " + el.rating : "Sin Puntuación" ;
-                                
-                            $template.querySelector("img").src = el.background_image ? el.background_image : el.short_screenshots[0].image;
-                            $template.querySelector("img").alt = el.name;
-                                 //$template.querySelector("img").style.maxWidth = "100%";
-                                //  $template.querySelector("a").href = el.show.url ? el.show.url : "#";
-                                //  $template.querySelector("a").target = el.show.url ? "_blank" : "_self";
-                                //  $template.querySelector("a").textContent = el.show.url ? "Ver más..." : "";
                                 
                             let $clone = d.importNode($template, true);
                             $fragment.appendChild($clone);

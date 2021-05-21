@@ -5,73 +5,72 @@ $items = d.getElementById("items"),
 $footer = d.getElementById("footer"),
 $templateFooter = d.getElementById("template-footer").content,
 $templateCarrito = d.getElementById("template-Carrito").content,
-$fragment =d.createDocumentFragment()
-let carrito = {}
-
-//nintendo
-const url = 'https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&platforms=7&page=3';
-//xbox
-//const url = 'https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&platforms=1&page=1';
-//play
-//const url = 'https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&platforms=187&page=1'
-//steam
-//const url = 'https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&platforms=4'
-//random
-//const url = 'https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&dates=2019-09-01,2019-09-30&platforms=18,1,7'
+$links = d.getElementById("links"),
+$fragment =d.createDocumentFragment();
+let carrito = {};
 
 
-d.addEventListener('DOMContentLoaded', () => {
-    fetch(url)
-    if(localStorage.getItem("carrito")){
-        carrito = JSON.parse(localStorage.getItem('carrito'))
-        pintarCarrito()
-    }
-})
-
-fetch(url)
-.then(response => response.json())
-.then(data => {   
-    console.log(data)
-    
-    data.results.forEach(element => {       
-        console.log(element)
-        //Nombre del Juego
-        $template.querySelector("#GameName").textContent = element.name
+function updateGames(url) {
+    if (url) {
+        $shows.innerHTML = "";
         
-        let precios = [999, 1199, 999, 1199, 899, 999, 1199, 899, 999, 1199, 899, 999, 999, 1199, 1199, 499, 799, 299, 999, 599]
-        precios.map(element =>{
-            console.log(element)
-            $template.querySelector("#precio").innerHTML = element
-        })
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {   
+        console.log(data);
+        const precios = [1199, 1199, 999, 899, 1199,  999, 1199, 899, 999, 1199, 899, 1199, 999, 1199, 1399, 499, 799, 299, 999, 599]
+        
+        data.results.forEach(element => {       
+        //console.log(element);
+        
+        //precio del juego
+        $template.querySelector("#precio").textContent = precios.shift();    
+        //Nombre del Juego
+        $template.querySelector("#GameName").textContent = element.name;
         //Rating del Juego
         $template.querySelector("#Rating").innerHTML = "Rating: " + element.rating + ` <i class="fas fa-star" style="color: yellow;"></i>` 
         ? "Rating: " + element.rating + ` <i class="fas fa-star" style="color: yellow;"></i>` : "Sin Puntuación";
         //Clasificación del Juego
-        // $template.querySelector("#esrb_rating").innerHTML = "Clasificación: " + element.esrb_rating.name ? "Clasificación: " + element.esrb_rating.name : "Sin Clasificación" ;
+        $template.querySelector("#esrb_rating").textContent =  element.esrb_rating == {} ? "Clasificación: "  :  element.esrb_rating == null ? "Sin Clasificación" : "Clasificación: " + element.esrb_rating.name;
         //Imagen del Juego                      
-        $template.querySelector("img").src = element.background_image ? element.background_image : element.short_screenshots[0].image
-        $template.querySelector("img").alt = element.name
-        $template.querySelector(".Carrito").id = element.id
+        $template.querySelector("img").src = element.background_image ? element.background_image : element.short_screenshots[0].image;
+        $template.querySelector("img").alt = element.name;
+        $template.querySelector(".Carrito").id = element.id;
+        //Genero del Juego
+        $template.querySelector("#Genres").innerHTML = element.genres[0].name;
+        
+        $clone = d.importNode($template, true);
+        $fragment.appendChild($clone);
+        $shows.appendChild($fragment);
+        }) //forEach
+        // Pintamos los enlaces de siguiente o anterior de la paginacion de los pokemones 
+        
+        //Boton hacia atrás
+        $links.innerHTML = (data.previous) ? `<button class="btn btn-light btn-lg" onclick="updateGames('${data.previous}')">  Atrás  </button>` : "";
+        //Botón hacia adelante
+        $links.innerHTML += (data.next) ? `<button class="btn btn-light btn-lg" onclick="updateGames('${data.next}')">Siguiente</button>` : "";      
+    }) //then Data
+    .catch(err=>console.log(err));
 
-        element.genres.forEach(ele => {
-            $template.querySelector("#Genres").textContent = ele.name ? ele.name : "Action"
-        })
+    d.addEventListener('DOMContentLoaded', () => {
+        fetch(url)
+        if(localStorage.getItem("carrito")){
+            carrito = JSON.parse(localStorage.getItem('carrito'))
+            pintarCarrito()
+        }//if
+    });// addEventListener
 
-        $clone = d.importNode($template, true)
-        $fragment.appendChild($clone)
-        $shows.appendChild($fragment)
+}//if
 
-    }) //forEach      
-}) //then Data
-.catch(err=>console.log(err));
+}//updateGames(url)
 
 $shows.addEventListener("click", e => {
     addCarrito(e)
-})
+}); //$shows.addEventListener
 
 $items.addEventListener('click', e => {
     btnAccion(e)
-})
+}); //$items.addEventListener
 
 const addCarrito = e => {
     if (e.target.classList.contains("btn-primary")){
@@ -107,10 +106,10 @@ const pintarCarrito = () =>{
         $templateCarrito.querySelector('span').textContent = producto.cantidad * producto.precio
         const clone = $templateCarrito.cloneNode(true)
         $fragment.appendChild(clone)
-    })
-    $items.appendChild($fragment)
-    pintarFooter()
-    localStorage.setItem('carrito', JSON.stringify(carrito))
+    });
+    $items.appendChild($fragment);
+    pintarFooter();
+    localStorage.setItem('carrito', JSON.stringify(carrito));
 }
 
 const pintarFooter = () =>{
@@ -118,13 +117,12 @@ const pintarFooter = () =>{
     if(Object.keys(carrito).length === 0){
         $footer.innerHTML = `<th scope="row" colspan="5">Carrito Vacío. ¡Comience a comprar!</th>`
         return
-    }
+    }//if
 
-    const nCantidad = Object.values(carrito).reduce( (acc, {cantidad}) => acc + cantidad, 0 )
-    const nPrecio = Object.values(carrito).reduce((acc, {cantidad, precio}) => acc +cantidad * precio, 0)
-
-    $templateFooter.querySelectorAll('td')[0].textContent = nCantidad
-    $templateFooter.querySelector('span').textContent = nPrecio
+    const nCantidad = Object.values(carrito).reduce( (acc, {cantidad}) => acc + cantidad, 0 );
+    const nPrecio = Object.values(carrito).reduce((acc, {cantidad, precio}) => acc + cantidad * precio, 0);
+    $templateFooter.querySelectorAll('td')[0].textContent = nCantidad;
+    $templateFooter.querySelector('span').textContent = nPrecio;
 
     const clone = $templateFooter.cloneNode(true)
     $fragment.appendChild(clone)
@@ -133,10 +131,33 @@ const pintarFooter = () =>{
     const Vaciar = d.addEventListener('click', () => {
         carrito = {}
         pintarCarrito()
-    })
-}
+    });//Vaciar
+}//pintarFooter
 
-const btnAccion = e => {
+// Render the PayPal button into #paypal-button-container
+paypal.Buttons({
+
+    // Set up the transaction
+    createOrder: function(data, actions) {
+        return actions.order.create({
+            purchase_units: [{
+                amount: {
+                    value: nPrecio
+                } //amount
+            }] //purchase_units
+        }); //actions.order
+    }, //createOrder
+
+    // Finalize the transaction
+    onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+            // Show a success message to the buyer
+            alert('Transaction completed by ' + details.payer.name.given_name + '!');
+        });
+    }//onApprove
+    }).render('#paypal-button-container');
+
+const btnAccion = (e) => {
     if( e.target.classList.contains('btn-info')){
         carrito[e.target.id]
         const producto = carrito[e.target.id]
@@ -155,7 +176,56 @@ const btnAccion = e => {
         pintarCarrito()
     } 
     e.stopPropagation()
-}
+};//btnAccion
+    updateGames("https://api.rawg.io/api/games?key=09740bd3088f4f9e8ccaf35af302c2d6&platforms=7&page=3");
 
+//paypal buttons
 
-
+        //  // Render the PayPal button into #paypal-button-container
+        //  paypal.Buttons({
+ 
+        //      // Call your server to set up the transaction
+        //      createOrder: function(data, actions) {
+        //          return fetch('/demo/checkout/api/paypal/order/create/', {
+        //              method: 'post'
+        //          }).then(function(res) {
+        //              return res.json();
+        //          }).then(function(orderData) {
+        //              return orderData.id;
+        //          });
+        //      },
+ 
+        //      // Call your server to finalize the transaction
+        //      onApprove: function(data, actions) {
+        //          return fetch('/demo/checkout/api/paypal/order/' + data.orderID + '/capture/', {
+        //              method: 'post'
+        //          }).then(function(res) {
+        //              return res.json();
+        //          }).then(function(orderData) {
+        //              // Three cases to handle:
+        //              //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+        //              //   (2) Other non-recoverable errors -> Show a failure message
+        //              //   (3) Successful transaction -> Show confirmation or thank you
+ 
+        //              // This example reads a v2/checkout/orders capture response, propagated from the server
+        //              // You could use a different API or structure for your 'orderData'
+        //              var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
+ 
+        //              if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
+        //                  return actions.restart(); // Recoverable state, per:
+        //                  // https://developer.paypal.com/docs/checkout/integration-features/funding-failure/
+        //              }
+ 
+        //              if (errorDetail) {
+        //                  var msg = 'Sorry, your transaction could not be processed.';
+        //                  if (errorDetail.description) msg += '\n\n' + errorDetail.description;
+        //                  if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
+        //                  return alert(msg); // Show a failure message
+        //              }
+ 
+        //              // Show a success message
+        //              alert('Transaction completed by ' + orderData.payer.name.given_name);
+        //          });
+        //      }
+ 
+        //  }).render('#paypal-button-container');
